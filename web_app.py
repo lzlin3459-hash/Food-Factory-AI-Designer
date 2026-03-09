@@ -15,16 +15,14 @@ import os
 plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'Arial Unicode MS'] 
 plt.rcParams['axes.unicode_minus'] = False
 
-# --- 1. 配置与 AI 初始化 (云端安全版) ---
-# 本地测试时会读取 .streamlit/secrets.toml，云端会读取后台配置
+# --- 1. 配置与 AI 初始化 (云端安全开源版) ---
 try:
-    deepseek_key = st.secrets["DEEPSEEK_API_KEY"]
+    api_key = st.secrets["DEEPSEEK_API_KEY"]
 except:
-    # 终极保底：如果都没配置，提示用户
-    deepseek_key = "请在云端后台配置您的 API Key"
+    api_key = "请在云端后台配置您的 API Key"
 
 client = OpenAI(
-    api_key=deepseek_key, 
+    api_key=api_key, 
     base_url="https://api.deepseek.com"
 )
 
@@ -43,29 +41,38 @@ def calculate_physics(capacity, category):
         "steam": round(capacity * 0.8 * factor, 1)
     }
 
-# --- 3. BOM 生成 (保留完整的智能运维建议) ---
+# --- 3. 深度解耦的 BOM 生成器 (不同品类，不同核心设备) ---
 def generate_detailed_bom(category, capacity, physics):
     base_bom = [
-        {"系统": "供电工程", "设备名称": "产线主配电柜", "规格": f"IP65 / {physics['elec']}kW", "数量": 1, "预估造价(万)": 8.0, "智能运维": "每季度检查防尘网，监控峰谷电耗。"},
-        {"系统": "水务工程", "设备名称": "不锈钢给水阀组", "规格": "SUS304 DN50", "数量": int(capacity/5)+2, "预估造价(万)": 2.5, "智能运维": "每月检查密封垫圈，防止滴漏引发车间霉菌。"}
+        {"系统": "供电工程", "设备名称": "产线主配电柜", "规格": f"IP65 / {physics['elec']}kW", "数量": 1, "预估造价(万)": 8.0, "智能运维": "每季度检查防尘网，监控峰谷电耗。"}
     ]
+    
     if category == "饼干/烘焙":
         oven_len = capacity * 5
         specific_bom = [
-            {"系统": "前段工艺", "设备名称": "卧式和面机", "规格": "双轴高速", "数量": 2, "预估造价(万)": 35.0, "智能运维": "每日班后检查轴承密封性，防止面筋渗入发酸。"},
-            {"系统": "成型工艺", "设备名称": "三道辊压机", "规格": "自动化控制", "数量": 1, "预估造价(万)": 65.0, "智能运维": "每日班后彻底清洁辊筒残料，防止交叉污染。"},
-            {"系统": "烘烤工艺", "设备名称": "隧道烘烤炉", "规格": f"长 {oven_len} 米", "数量": 1, "预估造价(万)": round(85.0 + oven_len*3.8, 1), "智能运维": "每两周检查燃烧器能效防止积碳；配置余热回收。"}
+            {"系统": "面团处理", "设备名称": "卧式双轴和面机", "规格": "防尘级", "数量": 2, "预估造价(万)": 35.0, "智能运维": "班后检查密封性，防面筋发酸。"},
+            {"系统": "成型工艺", "设备名称": "三道辊压机", "规格": "PLC自动化", "数量": 1, "预估造价(万)": 65.0, "智能运维": "彻底清洁辊筒残料。"},
+            {"系统": "烘烤工艺", "设备名称": "燃气隧道烘烤炉", "规格": f"长 {oven_len} 米", "数量": 1, "预估造价(万)": round(85.0 + oven_len*3.8, 1), "智能运维": "配置余热回收系统。"}
         ]
-    else:
-        specific_bom = [{"系统": "核心工艺", "设备名称": f"{category}主产线", "规格": f"产能匹配 {capacity}T", "数量": 1, "预估造价(万)": capacity*30, "智能运维": "严格执行 CIP 原位清洗或冷链温控标准。"}]
+    elif category == "乳制品/液态奶":
+        specific_bom = [
+            {"系统": "前处理", "设备名称": "原奶收储与净乳机", "规格": "SUS316L", "数量": 1, "预估造价(万)": 55.0, "智能运维": "监测离心机转子平衡。"},
+            {"系统": "杀菌工艺", "设备名称": "UHT 超高温管式杀菌机", "规格": "全自动温控", "数量": 1, "预估造价(万)": 120.0, "智能运维": "严格监控 137℃ 保温时间。"},
+            {"系统": "卫生保障", "设备名称": "CIP 中央自动清洗站", "规格": "酸碱水三罐", "数量": 1, "预估造价(万)": 45.0, "智能运维": "定期标定电导率仪，确保清洗液浓度。"}
+        ]
+    else: # 肉制品
+        specific_bom = [
+            {"系统": "前处理", "设备名称": "真空斩拌与滚揉机", "规格": "低温夹套冷水", "数量": 2, "预估造价(万)": 60.0, "智能运维": "监控真空泵油位。"},
+            {"系统": "热加工", "设备名称": "全自动烟熏蒸煮炉", "规格": "含烟雾发生器", "数量": 1, "预估造价(万)": 80.0, "智能运维": "排烟管道定期除焦油防明火。"},
+            {"系统": "冷链保障", "设备名称": "速冻库与制冷机组", "规格": "-35℃ 螺杆式", "数量": 1, "预估造价(万)": 110.0, "智能运维": "化霜周期智能调节。"}
+        ]
     return pd.DataFrame(base_bom + specific_bom)
 
-# --- 4. CAD 引擎 (保留尺寸标注、AGV、机械臂、隔离墙) ---
+# --- 4. 深度解耦的 CAD 引擎 (根据品类绘制完全不同的工艺设备布置) ---
 def generate_ultimate_dxf(capacity, category):
     doc = ezdxf.new('R2010'); doc.styles.new('CHS', dxfattribs={'font': 'simsun.ttc'})
     if 'METRIC' not in doc.dimstyles:
-        dimstyle = doc.dimstyles.new('METRIC')
-        dimstyle.dxf.dimasz = 100; dimstyle.dxf.dimtxt = 150; dimstyle.dxf.dimexo = 50
+        dimstyle = doc.dimstyles.new('METRIC'); dimstyle.dxf.dimasz = 100; dimstyle.dxf.dimtxt = 150
     if 'DASHED' not in doc.linetypes:
         doc.linetypes.new('DASHED', dxfattribs={'description': 'Dashed', 'pattern': [10.0, -5.0]})
 
@@ -76,29 +83,45 @@ def generate_ultimate_dxf(capacity, category):
         msp.add_text(name, dxfattribs={'height': 150, 'style': 'CHS'}).set_placement((x+length/2, 500), align=TextEntityAlignment.MIDDLE_CENTER)
         msp.add_linear_dim(base=(x, 1500), p1=(x, 1000), p2=(x+length, 1000), dimstyle='METRIC').render()
 
-    draw_equip("和面机A", 0, 2000); draw_equip("和面机B", 3000, 2000)
-    draw_equip("成型机组", 6000, 2000); draw_equip(f"核心处理段({category})", 9000, o_len, color=4)
+    if category == "饼干/烘焙":
+        draw_equip("和面区", 0, 2000); draw_equip("成型区", 3000, 2000)
+        draw_equip(f"燃气隧道炉 ({capacity}T)", 6000, o_len, color=4)
+        wall_x = 6000 + o_len + 500
+    elif category == "乳制品/液态奶":
+        draw_equip("原奶收储罐区", 0, 3000, color=3); draw_equip("UHT杀菌机组", 4000, 3000, color=1)
+        draw_equip("无菌灌装室", 8000, 4000, color=5); draw_equip("CIP中央清洗", 13000, 3000, color=4)
+        wall_x = 13000 + 3000 + 500
+    else: # 肉制品
+        draw_equip("解冻斩拌区", 0, 3000, color=1); draw_equip("真空滚揉区", 4000, 3000, color=2)
+        draw_equip("烟熏蒸煮炉", 8000, 4000, color=4); draw_equip("低温无菌包装", 13000, 4000, color=5)
+        wall_x = 13000 + 4000 + 500
 
     # 绘制机械臂安全区与 AGV 路径
-    msp.add_circle((7000, 500), radius=1500, dxfattribs={'linetype': 'DASHED', 'color': 2})
-    msp.add_text("机械臂安全半径 (1.5m)", dxfattribs={'height': 120, 'style': 'CHS', 'color': 2}).set_placement((7000, 2200))
-    path_y = -2500; total_width = 9000 + o_len + 2000
+    msp.add_circle((wall_x - 3000, 500), radius=1500, dxfattribs={'linetype': 'DASHED', 'color': 2})
+    msp.add_text("机械臂安全半径", dxfattribs={'height': 120, 'style': 'CHS', 'color': 2}).set_placement((wall_x - 3000, 2200))
+    path_y = -2500; total_width = wall_x + 1000
     msp.add_line((0, path_y), (total_width, path_y), dxfattribs={'linetype': 'DASHED', 'color': 3})
     msp.add_text("🤖 AGV 物流主干道", dxfattribs={'height': 150, 'style': 'CHS', 'color': 3}).set_placement((total_width/2, path_y-500), align=TextEntityAlignment.MIDDLE_CENTER)
 
     # 绘制 GB 14881 隔离墙
-    wall_x = 9000 + o_len + 500
     msp.add_line((wall_x, -4000), (wall_x, 4000), dxfattribs={'color': 1, 'lineweight': 35})
-    msp.add_text("GB 14881 生熟隔离墙", dxfattribs={'height': 250, 'color': 1, 'style': 'CHS'}).set_placement((wall_x+100, 3000))
-    msp.add_linear_dim(base=(0, -1500), p1=(0, 0), p2=(wall_x, 0), dimstyle='METRIC', override={'dimtxt': 200}).render()
+    msp.add_text("GB 14881 洁净隔离墙", dxfattribs={'height': 250, 'color': 1, 'style': 'CHS'}).set_placement((wall_x+100, 3000))
 
     buf = io.StringIO(); doc.write(buf); return buf.getvalue()
 
 # --- 5. 终极无崩版 PDF 生成器 (完美解决 Latin-1 与中文支持) ---
 def generate_pdf_proposal(project_name, category, capacity, cost, roi, physics, ai_report):
-    # 步骤 A：生成图表
-    labels = ['核心工艺设备', '公用辅助工程', '安装与自控', '不可预见费']
-    sizes = [cost * 0.65, cost * 0.15, cost * 0.10, cost * 0.10]
+    # 步骤 A：动态品类图表生成逻辑解耦
+    if category == "饼干/烘焙":
+        labels = ['隧道炉与成型', '天然气与排烟', '包装与自控', '不可预见费']
+        sizes = [cost * 0.55, cost * 0.20, cost * 0.15, cost * 0.10]
+    elif category == "乳制品/液态奶":
+        labels = ['管网与杀菌罐', '无菌净化空调', 'CIP与水处理', '不可预见费']
+        sizes = [cost * 0.45, cost * 0.25, cost * 0.20, cost * 0.10]
+    else: # 肉制品
+        labels = ['斩拌与深加工', '工业制冷冷库', '高频清洗排水', '不可预见费']
+        sizes = [cost * 0.40, cost * 0.35, cost * 0.15, cost * 0.10]
+
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140, colors=['#ff9999','#66b3ff','#99ff99','#ffcc99'])
     ax.axis('equal')
@@ -106,16 +129,14 @@ def generate_pdf_proposal(project_name, category, capacity, cost, roi, physics, 
     plt.savefig(chart_filename, bbox_inches='tight', transparent=True, dpi=150)
     plt.close(fig)
 
-# 步骤 B：初始化 PDF 并加载字体 (优先加载云端本地的阿里普惠体)
+    # 步骤 B：初始化 PDF 并自动寻址云端/本地字体
     pdf = FPDF()
     pdf.add_page()
     
     font_path = None
-    # 1. 首先尝试读取你上传到 GitHub 的阿里普惠体（云端使用）
     if os.path.exists("AlibabaPuHuiTi-3-115-Black.ttf"):
         font_path = "AlibabaPuHuiTi-3-115-Black.ttf"
     else:
-        # 2. 如果没找到，退回本地 Windows 系统寻找（本地测试使用）
         windows_fonts = ["C:\\Windows\\Fonts\\simhei.ttf", "C:\\Windows\\Fonts\\msyh.ttf", "C:\\Windows\\Fonts\\simsun.ttc"]
         for pf in windows_fonts:
             if os.path.exists(pf):
@@ -130,7 +151,6 @@ def generate_pdf_proposal(project_name, category, capacity, cost, roi, physics, 
         except:
             has_zh = False
 
-    # 智能文本降级机制 (绝对防止崩溃)
     def safe_print(size, zh_text, en_text, align='L'):
         if has_zh:
             pdf.set_font("ZH", size=size)
@@ -139,7 +159,7 @@ def generate_pdf_proposal(project_name, category, capacity, cost, roi, physics, 
             pdf.set_font("Arial", size=size)
             pdf.cell(0, 10, txt=en_text, ln=1, align=align)
 
-    # 步骤 C：写入内容 (旧版 fpdf 必须用 txt 和 ln=1)
+    # 步骤 C：写入内容
     if has_zh:
         pdf.set_font("ZH", size=18)
         pdf.cell(0, 15, txt="智能食品工厂商业计划书", ln=1, align='C')
@@ -175,14 +195,13 @@ def generate_pdf_proposal(project_name, category, capacity, cost, roi, physics, 
         pdf.set_font("Arial", size=11)
         pdf.multi_cell(0, 7, txt="Report generated. Chinese display disabled due to missing system fonts.")
 
-    # 步骤 E：物理文件缓冲流输出 (彻底解决 dest='S' 的编码崩溃)
+    # 步骤 E：物理文件缓冲流输出
     temp_pdf_name = "temp_proposal_buffer.pdf"
     pdf.output(temp_pdf_name)
     
     with open(temp_pdf_name, "rb") as f:
         pdf_bytes = f.read()
         
-    # 清理所有临时文件
     if os.path.exists(chart_filename): os.remove(chart_filename)
     if os.path.exists(temp_pdf_name): os.remove(temp_pdf_name)
         
@@ -238,5 +257,4 @@ e2.download_button("📐 下载全要素 CAD (DXF)", generate_ultimate_dxf(cap, 
 
 current_ai_report = st.session_state.get('ai_report', "请先运行上方的 AI 专家评估以生成报告内容。")
 pdf_bytes = generate_pdf_proposal(proj_name, cat, cap, total_cost, roi, physics, current_ai_report)
-
 e3.download_button("📕 下载可视化商业画册 (PDF)", pdf_bytes, "Project_Proposal.pdf", mime="application/pdf", use_container_width=True)
