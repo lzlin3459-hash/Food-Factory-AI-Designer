@@ -106,16 +106,21 @@ def generate_pdf_proposal(project_name, category, capacity, cost, roi, physics, 
     plt.savefig(chart_filename, bbox_inches='tight', transparent=True, dpi=150)
     plt.close(fig)
 
-    # 步骤 B：初始化 PDF 并自动寻址 Windows 系统字体
+# 步骤 B：初始化 PDF 并加载字体 (优先加载云端本地的阿里普惠体)
     pdf = FPDF()
     pdf.add_page()
     
     font_path = None
-    windows_fonts = ["C:\\Windows\\Fonts\\simhei.ttf", "C:\\Windows\\Fonts\\msyh.ttf", "C:\\Windows\\Fonts\\simsun.ttc"]
-    for pf in windows_fonts:
-        if os.path.exists(pf):
-            font_path = pf
-            break
+    # 1. 首先尝试读取你上传到 GitHub 的阿里普惠体（云端使用）
+    if os.path.exists("AlibabaPuHuiTi-3-115-Black.ttf"):
+        font_path = "AlibabaPuHuiTi-3-115-Black.ttf"
+    else:
+        # 2. 如果没找到，退回本地 Windows 系统寻找（本地测试使用）
+        windows_fonts = ["C:\\Windows\\Fonts\\simhei.ttf", "C:\\Windows\\Fonts\\msyh.ttf", "C:\\Windows\\Fonts\\simsun.ttc"]
+        for pf in windows_fonts:
+            if os.path.exists(pf):
+                font_path = pf
+                break
             
     has_zh = False
     if font_path:
@@ -233,4 +238,5 @@ e2.download_button("📐 下载全要素 CAD (DXF)", generate_ultimate_dxf(cap, 
 
 current_ai_report = st.session_state.get('ai_report', "请先运行上方的 AI 专家评估以生成报告内容。")
 pdf_bytes = generate_pdf_proposal(proj_name, cat, cap, total_cost, roi, physics, current_ai_report)
+
 e3.download_button("📕 下载可视化商业画册 (PDF)", pdf_bytes, "Project_Proposal.pdf", mime="application/pdf", use_container_width=True)
