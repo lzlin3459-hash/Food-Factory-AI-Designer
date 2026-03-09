@@ -9,10 +9,19 @@ import datetime
 import random
 from fpdf import FPDF
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import os
 
-# --- 0. 图表全局防乱码配置 ---
-plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei', 'Arial Unicode MS'] 
+# --- 0. 图表全局防乱码配置 (云端豆腐块终极修复版) ---
+font_path_cloud = "AlibabaPuHuiTi-3-115-Black.ttf"
+if os.path.exists(font_path_cloud):
+    # 如果在云端找到了阿里字体，强行注册给画图引擎 (修复 □□□□ 乱码)
+    fm.fontManager.addfont(font_path_cloud)
+    prop = fm.FontProperties(fname=font_path_cloud)
+    plt.rcParams['font.family'] = prop.get_name()
+else:
+    # 本地退回策略
+    plt.rcParams['font.sans-serif'] = ['SimHei', 'Microsoft YaHei'] 
 plt.rcParams['axes.unicode_minus'] = False
 
 # --- 1. 配置与 AI 初始化 (云端安全开源版) ---
@@ -41,12 +50,11 @@ def calculate_physics(capacity, category):
         "steam": round(capacity * 0.8 * factor, 1)
     }
 
-# --- 3. 深度解耦的 BOM 生成器 (不同品类，不同核心设备) ---
+# --- 3. 深度解耦的 BOM 生成器 ---
 def generate_detailed_bom(category, capacity, physics):
     base_bom = [
         {"系统": "供电工程", "设备名称": "产线主配电柜", "规格": f"IP65 / {physics['elec']}kW", "数量": 1, "预估造价(万)": 8.0, "智能运维": "每季度检查防尘网，监控峰谷电耗。"}
     ]
-    
     if category == "饼干/烘焙":
         oven_len = capacity * 5
         specific_bom = [
@@ -60,7 +68,7 @@ def generate_detailed_bom(category, capacity, physics):
             {"系统": "杀菌工艺", "设备名称": "UHT 超高温管式杀菌机", "规格": "全自动温控", "数量": 1, "预估造价(万)": 120.0, "智能运维": "严格监控 137℃ 保温时间。"},
             {"系统": "卫生保障", "设备名称": "CIP 中央自动清洗站", "规格": "酸碱水三罐", "数量": 1, "预估造价(万)": 45.0, "智能运维": "定期标定电导率仪，确保清洗液浓度。"}
         ]
-    else: # 肉制品
+    else: 
         specific_bom = [
             {"系统": "前处理", "设备名称": "真空斩拌与滚揉机", "规格": "低温夹套冷水", "数量": 2, "预估造价(万)": 60.0, "智能运维": "监控真空泵油位。"},
             {"系统": "热加工", "设备名称": "全自动烟熏蒸煮炉", "规格": "含烟雾发生器", "数量": 1, "预估造价(万)": 80.0, "智能运维": "排烟管道定期除焦油防明火。"},
@@ -68,7 +76,7 @@ def generate_detailed_bom(category, capacity, physics):
         ]
     return pd.DataFrame(base_bom + specific_bom)
 
-# --- 4. 深度解耦的 CAD 引擎 (根据品类绘制完全不同的工艺设备布置) ---
+# --- 4. 深度解耦的 CAD 引擎 ---
 def generate_ultimate_dxf(capacity, category):
     doc = ezdxf.new('R2010'); doc.styles.new('CHS', dxfattribs={'font': 'simsun.ttc'})
     if 'METRIC' not in doc.dimstyles:
@@ -91,34 +99,31 @@ def generate_ultimate_dxf(capacity, category):
         draw_equip("原奶收储罐区", 0, 3000, color=3); draw_equip("UHT杀菌机组", 4000, 3000, color=1)
         draw_equip("无菌灌装室", 8000, 4000, color=5); draw_equip("CIP中央清洗", 13000, 3000, color=4)
         wall_x = 13000 + 3000 + 500
-    else: # 肉制品
+    else: 
         draw_equip("解冻斩拌区", 0, 3000, color=1); draw_equip("真空滚揉区", 4000, 3000, color=2)
         draw_equip("烟熏蒸煮炉", 8000, 4000, color=4); draw_equip("低温无菌包装", 13000, 4000, color=5)
         wall_x = 13000 + 4000 + 500
 
-    # 绘制机械臂安全区与 AGV 路径
     msp.add_circle((wall_x - 3000, 500), radius=1500, dxfattribs={'linetype': 'DASHED', 'color': 2})
     msp.add_text("机械臂安全半径", dxfattribs={'height': 120, 'style': 'CHS', 'color': 2}).set_placement((wall_x - 3000, 2200))
     path_y = -2500; total_width = wall_x + 1000
     msp.add_line((0, path_y), (total_width, path_y), dxfattribs={'linetype': 'DASHED', 'color': 3})
     msp.add_text("🤖 AGV 物流主干道", dxfattribs={'height': 150, 'style': 'CHS', 'color': 3}).set_placement((total_width/2, path_y-500), align=TextEntityAlignment.MIDDLE_CENTER)
 
-    # 绘制 GB 14881 隔离墙
     msp.add_line((wall_x, -4000), (wall_x, 4000), dxfattribs={'color': 1, 'lineweight': 35})
     msp.add_text("GB 14881 洁净隔离墙", dxfattribs={'height': 250, 'color': 1, 'style': 'CHS'}).set_placement((wall_x+100, 3000))
 
     buf = io.StringIO(); doc.write(buf); return buf.getvalue()
 
-# --- 5. 终极无崩版 PDF 生成器 (完美解决 Latin-1 与中文支持) ---
+# --- 5. PDF 商业画册生成器 ---
 def generate_pdf_proposal(project_name, category, capacity, cost, roi, physics, ai_report):
-    # 步骤 A：动态品类图表生成逻辑解耦
     if category == "饼干/烘焙":
         labels = ['隧道炉与成型', '天然气与排烟', '包装与自控', '不可预见费']
         sizes = [cost * 0.55, cost * 0.20, cost * 0.15, cost * 0.10]
     elif category == "乳制品/液态奶":
         labels = ['管网与杀菌罐', '无菌净化空调', 'CIP与水处理', '不可预见费']
         sizes = [cost * 0.45, cost * 0.25, cost * 0.20, cost * 0.10]
-    else: # 肉制品
+    else: 
         labels = ['斩拌与深加工', '工业制冷冷库', '高频清洗排水', '不可预见费']
         sizes = [cost * 0.40, cost * 0.35, cost * 0.15, cost * 0.10]
 
@@ -129,7 +134,6 @@ def generate_pdf_proposal(project_name, category, capacity, cost, roi, physics, 
     plt.savefig(chart_filename, bbox_inches='tight', transparent=True, dpi=150)
     plt.close(fig)
 
-    # 步骤 B：初始化 PDF 并自动寻址云端/本地字体
     pdf = FPDF()
     pdf.add_page()
     
@@ -159,7 +163,6 @@ def generate_pdf_proposal(project_name, category, capacity, cost, roi, physics, 
             pdf.set_font("Arial", size=size)
             pdf.cell(0, 10, txt=en_text, ln=1, align=align)
 
-    # 步骤 C：写入内容
     if has_zh:
         pdf.set_font("ZH", size=18)
         pdf.cell(0, 15, txt="智能食品工厂商业计划书", ln=1, align='C')
@@ -175,7 +178,6 @@ def generate_pdf_proposal(project_name, category, capacity, cost, roi, physics, 
     safe_print(12, f"  • 预估总投资 : ￥{cost} 万", f"  - CAPEX: {cost} 万")
     safe_print(12, f"  • 投资回报期 : {roi} 年", f"  - ROI: {roi} Years")
     
-    # 步骤 D：嵌入图表
     current_y = pdf.get_y()
     if os.path.exists(chart_filename):
         pdf.image(chart_filename, x=45, y=current_y + 2, w=120)
@@ -195,7 +197,6 @@ def generate_pdf_proposal(project_name, category, capacity, cost, roi, physics, 
         pdf.set_font("Arial", size=11)
         pdf.multi_cell(0, 7, txt="Report generated. Chinese display disabled due to missing system fonts.")
 
-    # 步骤 E：物理文件缓冲流输出
     temp_pdf_name = "temp_proposal_buffer.pdf"
     pdf.output(temp_pdf_name)
     
@@ -224,7 +225,7 @@ bom_df = generate_detailed_bom(cat, cap, physics)
 total_cost = round(bom_df["预估造价(万)"].sum() * 1.15, 1)
 roi = round(15.0 / (cap * 100 * 300 * 0.12 * 0.0035 + (cap*0.2*c_price)/10000 + 0.1), 1)
 
-st.title("🏭 终极态：从数字设计到商业画册无损交付")
+st.title("🏭 终极态：从数字设计到商业与工程双轨交付")
 
 c1, c2, c3, c4 = st.columns(4)
 c1.metric("总投预估", f"￥{total_cost} 万")
@@ -232,29 +233,52 @@ c2.metric("碳对冲 ROI", f"{roi} 年")
 c3.metric("电力负荷", f"{physics['elec']} kW")
 c4.metric("构件与运维项", len(bom_df))
 
+# 模块一：短篇商业评估 (用于 PDF 画册)
+st.subheader("📊 1. 商业路演准备 (面向投资方)")
 ai_content = "暂未生成 AI 报告。请点击下方按钮启动评估。"
-if st.button("✨ 1. 启动 DeepSeek 专家评估 (获取画册素材)", use_container_width=True):
+if st.button("✨ 启动路演级 AI 评估 (获取 PDF 画册素材)", use_container_width=True):
     with st.spinner('正在撰写商业企划文案...'):
         try:
             prompt = f"针对{proj_name}({cat})，产能{cap}吨。请从合规和ROI角度给出一段200字的中文纯文本总结。"
             resp = client.chat.completions.create(model="deepseek-chat", messages=[{"role": "user", "content": prompt}])
             ai_content = resp.choices[0].message.content
             st.session_state['ai_report'] = ai_content
-            st.success("AI 评估完成！请在下方下载画册。")
+            st.success("商业评估完成！")
+        except Exception as e:
+            st.error(f"AI 调用异常: {e}")
+
+# 模块二：长篇工艺说明书 (面向厂长与环保局)
+st.subheader("📝 2. 工程技术交付 (面向建设方)")
+if st.button("🚀 撰写详尽《工厂工艺说明书》(约需 15 秒)", use_container_width=True):
+    with st.spinner('DeepSeek 正在深度推演工艺流程、卫生分区与三废处理方案...'):
+        try:
+            long_prompt = f"作为食品工程领域架构师，请为产能为{cap}吨/天的{cat}工厂撰写一份专业的《工厂工艺说明书与项目建议书》。包含以下章节：1. 核心工艺流程描述；2. GB 14881 卫生分区规范(划分高低洁净区及人流物流防交叉策略)；3. 设备选型与能耗原理；4. 三废(废水、废气、固废)环保处理建议。要求极其专业严谨，使用结构化的排版，不少于800字。"
+            resp_long = client.chat.completions.create(model="deepseek-chat", messages=[{"role": "user", "content": long_prompt}])
+            st.session_state['manual_md'] = f"# {proj_name} - {cat} 工厂工艺说明书\n\n" + resp_long.choices[0].message.content
+            st.success("工艺说明书撰写完毕！请在下方下载。")
         except Exception as e:
             st.error(f"AI 调用异常: {e}")
 
 st.divider()
-st.subheader("📥 2. 全要素交付物一键打包")
-e1, e2, e3 = st.columns(3)
+st.subheader("📥 3. 全要素交付物一键打包")
+e1, e2, e3, e4 = st.columns(4)
 
+# 按钮 1：BOM
 excel_buf = io.BytesIO()
 with pd.ExcelWriter(excel_buf, engine='openpyxl') as writer:
     bom_df.to_excel(writer, index=False, sheet_name='智能运维清单')
-e1.download_button("📊 下载含运维 BOM (Excel)", excel_buf.getvalue(), "Detailed_BOM.xlsx", use_container_width=True)
+e1.download_button("📊 下载运维 BOM (Excel)", excel_buf.getvalue(), "Detailed_BOM.xlsx", use_container_width=True)
 
-e2.download_button("📐 下载全要素 CAD (DXF)", generate_ultimate_dxf(cap, cat), "Full_Layout.dxf", use_container_width=True)
+# 按钮 2：CAD
+e2.download_button("📐 下载图纸 (DXF)", generate_ultimate_dxf(cap, cat), "Full_Layout.dxf", use_container_width=True)
 
+# 按钮 3：商业画册 (PDF)
 current_ai_report = st.session_state.get('ai_report', "请先运行上方的 AI 专家评估以生成报告内容。")
 pdf_bytes = generate_pdf_proposal(proj_name, cat, cap, total_cost, roi, physics, current_ai_report)
-e3.download_button("📕 下载可视化商业画册 (PDF)", pdf_bytes, "Project_Proposal.pdf", mime="application/pdf", use_container_width=True)
+e3.download_button("📕 下载商业画册 (PDF)", pdf_bytes, "Project_Proposal.pdf", mime="application/pdf", use_container_width=True)
+
+# 按钮 4：工艺说明书 (Markdown -> Word)
+if 'manual_md' in st.session_state:
+    e4.download_button("📄 下载工艺说明书 (可用于Word)", st.session_state['manual_md'].encode('utf-8'), "Factory_Operation_Manual.md", use_container_width=True)
+else:
+    e4.button("📄 请先生成说明书", disabled=True, use_container_width=True)
