@@ -48,3 +48,21 @@ graph TD
     G --> I[带管网的 CAD 图纸]
     H --> J[带图表的 PDF 画册]
     H --> K[多维度 Excel 清单]
+
+---
+
+## 🛠️ 技术栈 (Tech Stack)
+
+- **Frontend & App Framework**: [Streamlit](https://streamlit.io/)
+- **AI Brain**: DeepSeek-V3 / Chat (OpenAI API Compatible)
+- **Engineering CAD**: `ezdxf` (LOD 300 级别图纸逻辑与多图层生成)
+- **Document Engines**: `python-docx` (Word), `fpdf2` & `matplotlib` (PDF), `pandas` & `openpyxl` (Excel)
+
+---
+
+## 🚀 快速启动 (Quick Start)
+
+**1. 克隆项目**
+```bash
+git clone [https://github.com/your-username/Food-Factory-AI-Designer.git](https://github.com/your-username/Food-Factory-AI-Designer.git)
+cd Food-Factory-AI-Designer
