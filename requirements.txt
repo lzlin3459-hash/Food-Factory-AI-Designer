@@ -1,6 +1,8 @@
 streamlit
 ezdxf
 pandas
+plotly
 openai
+fpdf2
 matplotlib
 openpyxl
