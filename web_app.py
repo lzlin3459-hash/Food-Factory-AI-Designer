@@ -211,7 +211,7 @@ with st.sidebar:
 
 physics = calculate_physics(cap, cat)
 bom_df = generate_detailed_bom(cat, cap, physics)
-total_cost = round(bom_df["预估造价(万)"].sum() * 1.15, 1)
+total_cost = round(bom_df["预估造价"].sum() * 1.15, 1)
 roi = round(15.0 / (cap * 100 * 300 * 0.12 * 0.0035 + (cap*0.2*c_price)/10000 + 0.1), 1)
 
 st.title("🏭 全要素基座：不仅是产线，更是工业生态")
@@ -257,3 +257,4 @@ if 'word_content' in st.session_state:
     e4.download_button("📄 下载项目建议书(Word)", word_bytes, "Project_Proposal.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document", use_container_width=True)
 else:
     e4.button("📄 请先生成建议书", disabled=True, use_container_width=True)
+
