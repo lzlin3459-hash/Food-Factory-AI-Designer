@@ -42,12 +42,13 @@ graph TD
     C -->|Prompt: 卫生分区/机电规范| E[DeepSeek 大模型]
     E -->|1500+字专业指导| F[Word 文档引擎]
     
-    D -->|坐标推算/多图层映射| G[ezdxf 二维空间引擎]
+    D -->|坐标推算/多专业图层映射| G[ezdxf 二维空间引擎]
     D -->|财务与运维匹配| H[Pandas 矩阵引擎]
     
-    G --> I[带管网的 CAD 图纸]
-    H --> J[带图表的 PDF 画册]
-    H --> K[多维度 Excel 清单]
+    G --> I[带全专业管网的 CAD 图纸]
+    H --> J[带投资图表的 PDF 画册]
+    H --> K[带双轨建议的 Excel 清单]
+```
 
 ---
 
@@ -66,3 +67,4 @@ graph TD
 ```bash
 git clone [https://github.com/your-username/Food-Factory-AI-Designer.git](https://github.com/your-username/Food-Factory-AI-Designer.git)
 cd Food-Factory-AI-Designer
+
