@@ -1,70 +1,73 @@
-# 🏭 Food-Factory-AI-Designer | 工业级食品工厂智能架构基座
+# 🏭 AI-Driven EPC Factory Designer (工业元宇宙总图基座)
 
-<div align="center">
-  <p><strong>🚀 领域架构师的跨界探索：当 AI 大模型遇上传统 EPC 工程总包与绿色金融。</strong></p>
-</div>
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
+![Streamlit](https://img.shields.io/badge/Framework-Streamlit-FF4B4B)
+![DeepSeek](https://img.shields.io/badge/AI_Brain-DeepSeek_V3-4D66E5)
+![CAD](https://img.shields.io/badge/Export-DXF_Matrix-orange)
 
-## 💡 项目愿景 (Vision)
+本项目是一个专为工程总包（EPC）、规划院及食品企业打造的**“售前拿单与工程推演核武器”**。通过物理规则推演与大模型 AI 的深度融合，将需要专业工程师数周才能完成的规划工作，压缩至**秒级交付**。
 
-本项目并非一个简单的“聊天机器人”，而是一个专为工程总包（EPC）公司、咨询规划院及食品企业打造的 **“售前拿单与工程推演核武器”**。
+## ✨ 核心特性 (Core Features)
 
-传统工业设计在售前阶段需耗费多专业工程师数周时间。本系统通过融合 AI 大模型底座与物理规则推算，实现从“需求录入”到“全专业交付物（建筑/机电/工艺/财务）”的秒级跨越。只需一杯咖啡的时间，即可当面向甲方展示极具专业深度的全要素数字化方案。
+* **📏 参数化空间折叠引擎**：输入地块面积（红线约束），系统自动进行 3D 体量缩放与容积率推演。
+* **📐 甲级标准 CAD 矩阵**：一键导出包含图框、全域尺寸标注与结构轴号的 4 张专业 DXF 图纸（总平/结构/机电/暖通）。
+* **🛡️ 国家 SC 认证合规防线**：内置极其严苛的食品级规范，强制规划一/二更风淋缓冲舱，以及下风向污水处理站。
+* **👁️ 边缘视觉 AI 赋能**：在包装区咽喉处自动部署机器视觉锚点，精准规划缺陷剔除拦截网（如：包装漏气、异物混入）。
+* **⚡ 极速流式报告生成**：结合实时大宗商品行情（钢价/铜价）与地域系数，实时打字机式输出 1500 字多专业协同审查报告。
 
----
-
-## 📦 四大硬核交付物 (Core Deliverables)
-
-本系统彻底抛弃了“大模型只产出文本”的局限，实现了跨格式的硬核工程文件原生生成：
-
-1. **📐 多图层全尺度 CAD 引擎 (`.dxf`)**
-   - **不止于产线**：自动推演并绘制立体仓储、风淋更衣防线、员工生活区等全厂生态。
-   - **BIM 化机电管网**：通过分离图层（Layer），自动铺设 1.5% 坡度排水地沟、悬挂式蒸汽与纯水管廊，并可视化标注车间正负压（±5Pa）控制边界。
-2. **📄 公文级机电审查说明书 (`.docx`)**
-   - **原生 Word 排版**：利用 `python-docx` 引擎，直接生成带网格表、加粗标题及宋体规范排版的标准红头文件。
-   - **大模型深度推演**：根据品类自动撰写超 1500 字的详细工艺选型、GB 14881 动线防交叉策略及三废处理规范。
-3. **📊 智能双轨 BOM 清单 (`.xlsx`)**
-   - **审查与运维双驱**：涵盖给排水、电气、暖通、工艺及基建全专业。既包含应对食药监审查的 `[合规说明]`，又为厂长提供落地的 `[智能运维建议]`。
-4. **📕 动态商业路演画册 (`.pdf`)**
-   - **绿色金融注入**：实时接入最新不锈钢及碳交易（ETS）行情。
-   - **自动财务图表**：无缝解决云端 Linux 字体渲染，静态生成带具体资金分布的投资回报（ROI）饼状图。
-
----
-
-## 🏗️ 系统架构图 (Architecture)
+## 🏗️ 架构拓扑 (Architecture)
 
 ```mermaid
 graph TD
-    A[用户交互层 UI - Streamlit] -->|输入: 品类/产能/实时行情| B(物理与规则推演引擎)
+    A[用户交互与参数录入] --> B(物理约束与空间折叠引擎)
+    B --> C{AI 边缘视觉模型规划}
+    B --> D{机电与土建降维解耦}
     
-    B --> C{AI 领域架构基座}
-    B --> D{机电与土建规则库}
+    C -->|大模型流式推理| E[1500字合规审查报告 Word]
     
-    C -->|Prompt: 卫生分区/机电规范| E[DeepSeek 大模型]
-    E -->|1500+字专业指导| F[Word 文档引擎]
+    D -->|EZDXF 图层隔离| F1[总平规划图]
+    D -->|网格与气泡| F2[结构柱网图]
+    D -->|强电与给排水| F3[机电综合图]
+    D -->|送风与压差控制| F4[暖通HVAC图]
     
-    D -->|坐标推算/多专业图层映射| G[ezdxf 二维空间引擎]
-    D -->|财务与运维匹配| H[Pandas 矩阵引擎]
-    
-    G --> I[带全专业管网的 CAD 图纸]
-    H --> J[带投资图表的 PDF 画册]
-    H --> K[带双轨建议的 Excel 清单]
+    D -->|Plotly WebGL| G[可触控交互 3D 厂区模型]
+    D -->|Pandas| H[智能运维 BOM 清单]
 ```
 
+## 👀 系统路演实况 (System Demo)
+
+### 1. 🌐 3D 厂区数字孪生与 AI 节点推演
+系统内置 WebGL 引擎，实时渲染带建筑体量与 AI 视觉拦截节点（红十字标识）的 3D 可交互沙盘。
+![3D 厂区沙盘](assets/demo_3d.png)
+
+### 2. 📐 甲级标准 CAD 矩阵生成
+告别传统脚本的“毛坯图”。一键生成包含严格占地红线约束、全域工程尺寸标注、以及标准出图图框的 DXF 施工基图。
+![CAD 工程图纸](assets/demo_cad.png)
+
+### 3. 🤖 领域大模型流式合规审查
+深度融合地域系数与食品合规标准（如 SC 洁净要求），实时流式输出具有顶层总工视角的专业建议书。
+![AI 审查报告](assets/demo_ui.png)
+
 ---
 
-## 🛠️ 技术栈 (Tech Stack)
+## 🚀 极速启动 (Quick Start)
 
-- **Frontend & App Framework**: [Streamlit](https://streamlit.io/)
-- **AI Brain**: DeepSeek-V3 / Chat (OpenAI API Compatible)
-- **Engineering CAD**: `ezdxf` (LOD 300 级别图纸逻辑与多图层生成)
-- **Document Engines**: `python-docx` (Word), `fpdf2` & `matplotlib` (PDF), `pandas` & `openpyxl` (Excel)
-
----
-
-## 🚀 快速启动 (Quick Start)
-
-**1. 克隆项目**
+**1. 克隆项目与安装环境**
 ```bash
-git clone [https://github.com/your-username/Food-Factory-AI-Designer.git](https://github.com/your-username/Food-Factory-AI-Designer.git)
-cd Food-Factory-AI-Designer
+git clone [https://github.com/YourUsername/AutoFood_CAD_System.git](https://github.com/YourUsername/AutoFood_CAD_System.git)
+cd AutoFood_CAD_System
+pip install -r requirements.txt
+```
 
+**2. 配置 AI 密钥**
+在根目录创建 `.streamlit/secrets.toml`：
+```toml
+DEEPSEEK_API_KEY = "sk-您的专属密钥"
+```
+
+**3. 点火启动**
+```bash
+streamlit run web_app.py
+```
+
+> **👨‍💻 总工免责声明**：本系统导出的图纸矩阵（LOD 200-300）用于极速锁定规划方向与评估投资。实际施工蓝图（LOD 400）仍需由持证 BIM 工程师与结构工程师深化出具。
