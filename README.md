@@ -1,4 +1,4 @@
-# 🏭 AI-Driven EPC Factory Designer (工业元宇宙总图基座)
+# 🏭 智能 EPC 厂区总图规划 SaaS 系统
 
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
 ![Streamlit](https://img.shields.io/badge/Framework-Streamlit-FF4B4B)
